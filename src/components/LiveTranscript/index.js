@@ -5,8 +5,14 @@ import styles from "../../globalStyle";
 import {ThemeProvider} from "@material-ui/styles";
 import theme from "../../Theme";
 
+
+
+
 const LiveTranscript = ({transcriptResponse, classes}) => {
+
     return (
+
+
         <ThemeProvider theme={theme}>
             <Paper variant={"outlined"} className={classes.paper} style={{
                 marginBottom: 15,
@@ -18,6 +24,7 @@ const LiveTranscript = ({transcriptResponse, classes}) => {
                 </Typography>
                 <Typography>
                     {
+
                         transcriptResponse && transcriptResponse.payload.content ?
                             (<Typography variant={"body1"} style={{color: 'gray'}}>
                                 {transcriptResponse.payload.content}

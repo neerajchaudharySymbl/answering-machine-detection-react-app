@@ -9,8 +9,9 @@ import {startEndpoint, stopEndpoint} from '../../utils/symbl-utils';
 import moment from 'moment';
 import LiveTranscript from "../LiveTranscript";
 import EventsTimeline from "../EventsTimeline";
-
+import MessageR from "../MessageR";
 import styles from '../../globalStyle';
+import {Message} from "@material-ui/icons";
 
 class LiveDemo extends React.Component {
 
@@ -22,6 +23,14 @@ class LiveDemo extends React.Component {
             phoneNumber: '',
             events: [],
             transcriptResponse: {
+
+
+            payload: {
+                content: ''
+            }
+
+            },
+            messageResponse: {
                 payload: {
                     content: ''
                 }
@@ -39,6 +48,9 @@ class LiveDemo extends React.Component {
             callInitiatedTime: undefined,
             callButtonText: 'Call',
             callInProgress: false,
+            summaryButtonText:'Summary',
+            summaryGenerated:false
+
         };
 
         this.state = this.initialState;
@@ -93,6 +105,8 @@ class LiveDemo extends React.Component {
             events: [...this.state.events, _event]
         });
     }
+//// For transcript
+    tempMessage=null;
 
     onSpeechDetected = async (data) => {
         const {type} = data;
@@ -160,12 +174,39 @@ class LiveDemo extends React.Component {
         } else if (type === 'transcript_response') {
             const { transcriptResponse } = this.state;
             console.log(transcriptResponse);
+            console.log("data is final "+data.isFinal);
+            console.log("data payload content"+data.payload.content);
+            console.log("tempMessage"+this.tempMessage);
             if (!!transcriptResponse) {
                 this.setState({
                     transcriptResponse: data
                 });
+                if(data.isFinal==true&&(this.tempMessage!=data.payload.content)) {
+                    this.tempMessage = data.payload.content;
+                    this.setState({
+                        messageResponse: data
+                    });
+                }
             }
-        } else if (type === 'insight_response') {
+        }
+        //////new code
+
+        else if (type === 'transcript_response') {
+            const { transcriptResponse } = this.state;
+
+
+            console.log("data is final "+data.isFinal);
+            if (!!transcriptResponse) {
+                if(data.isFinal==true&&(this.tempMessage!=data.payload.content)) {
+                    this.tempMessage =data.payload.content;
+                    this.setState({
+                        messageResponse: data
+                    });
+                }
+            }
+        }
+
+        else if (type === 'insight_response') {
             console.log(data);
             const {insights} = data;
             if (insights.length > 0) {
@@ -328,16 +369,40 @@ class LiveDemo extends React.Component {
                                                     </Typography>
                                                 </Grid>
 
-                                                <Grid item style={{paddingTop: 40}}>
-                                                    <Button
+                                                <Grid container direction={"row"}>
+
+                                                    <Grid item style={{paddingTop: 40}}>
+                                                        <Button
                                                         variant={"contained"}
                                                         color={"primary"}
                                                         disableElevation
                                                         onClick={this.call}
                                                         disabled={this.state.callButtonText === 'Calling' || this.state.callButtonText === 'Disconnecting'}
-                                                    >{this.state.callButtonText}</Button>
+                                                        >{this.state.callButtonText}</Button>
+                                                    </Grid>
+                                                    <Grid item style={{paddingTop: 40,paddingLeft:130} }>
+                                                        <Button
+                                                            title={'summary will be generated after call ends'}
+                                                            variant={"contained"}
+                                                            color='Green'
+                                                            style={{backgroundColor: 'green', color: 'white'}}
+                                                            disableElevation
+                                                            onClick={() => {
+
+
+                                                                window.open(window.$surl);
+
+
+                                                            }}
+                                                            disabled={this.state.callButtonText === 'Calling' || this.state.callButtonText === 'Disconnecting'}
+                                                        >Summary</Button>
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item xs={12} sm={10} className={"flex-col-scroll"} style={{paddingTop: 40}}>
+                                                    <MessageR messageResponse={this.state.messageResponse}/>
                                                 </Grid>
                                             </Grid>
+
 
                                         </Grid>
 
@@ -349,6 +414,7 @@ class LiveDemo extends React.Component {
                                     events={this.state.events}
                                 />
                             </Grid>
+
                         </Grid>
                     </Container>
         );

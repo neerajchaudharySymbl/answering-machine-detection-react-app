@@ -35,6 +35,8 @@ export const startEndpoint = async (phoneNumber, callback, endCallAfterInSeconds
 
         const connectionId = connection.connectionId;
         console.log('Call established for connectionId: ' + connectionId);
+        console.log(connection.conversationId);
+        console.log(connection.summaryInfo);
 
         stopEndpointTimeoutRef = setTimeout(async () => {
             clearTimeout(stopEndpointTimeoutRef);
@@ -64,6 +66,7 @@ export const stopEndpoint = async (connectionId) => {
 
         console.log('Summary Info:', connection.summaryInfo);
         console.log('Conversation ID:', connection.conversationId);
+        window.$surl=connection.summaryInfo[0].url;
 
         return {
             summaryInfo: connection.summaryInfo,
